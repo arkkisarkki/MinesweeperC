@@ -10,20 +10,13 @@
 #define SQUARE_FLAG_MINE		2
 #define SQUARE_FLAG_FLAGGED		4
 
-#define ERROR_MINE_COUNT	2
-#define ERROR_MEM			1
-#define OK					0
+typedef enum InitResult_ {
+	ERROR_MINE_COUNT,
+	ERROR_MEM,
+	OK
+} InitResult;
 
-#define OPEN_RESULT_CLEAR			0
-#define OPEN_RESULT_MINE			1
-#define OPEN_RESULT_ALREADY_OPEN	2
-#define OPEN_RESULT_DEAD			3
-#define OPEN_RESULT_FLAGGED			4
-#define OPEN_RESULT_VICTORY			5
-
-#define RESULT_FLAG_TOGGLED			6
-
-typedef enum Result_ {
+typedef enum ActionResult_ {
 	CLEAR,
 	MINE,
 	ALREADY_OPEN,
@@ -32,7 +25,7 @@ typedef enum Result_ {
 	VICTORY,
 	FLAG_TOGGLED,
 	CANT_FLAG
-} Result;
+} ActionResult;
 
 typedef struct Minesweeper_ 
 {
@@ -69,13 +62,13 @@ typedef struct Neighbors_
 	};
 } Neighbors;
 
-int initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, uint16_t mine_count);
+InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, uint16_t mine_count);
 
 void printMinesweeper(Minesweeper* game);
 
-Result openSquare(Minesweeper* game, uint16_t x, uint16_t y);
+ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y);
 
-Result toggleFlag(Minesweeper* game, uint16_t x, uint16_t y);
+ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y);
 
 void deleteMinesweeper(Minesweeper* game);
 #endif

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-int initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, uint16_t mine_count)
+InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, uint16_t mine_count)
 {
 	game->width = width;
 	game->height = height;
@@ -164,7 +164,7 @@ static int checkVictory(Minesweeper* game)
 	return game->width * game->height - open_count == game->mines;
 }
 
-Result openSquare(Minesweeper* game, uint16_t x, uint16_t y)
+ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	if (!(game->flags & GAME_FLAG_ALIVE))
 	{
@@ -210,7 +210,7 @@ Result openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 	return CLEAR;
 }
 
-int toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
+ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	game->squares[game->width * y + x] ^= SQUARE_FLAG_FLAGGED;
 	return FLAG_TOGGLED;

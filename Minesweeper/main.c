@@ -16,7 +16,7 @@ int main()
 		char command;
 		unsigned int x;
 		unsigned int y;
-		Result result;
+		ActionResult result;
 		
 		int read = scanf_s(" %c %u %u", &command, 1, &x, &y);
 		if (command == 'o')
