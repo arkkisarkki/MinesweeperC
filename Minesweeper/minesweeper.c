@@ -183,6 +183,7 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 	}
 
 	*target |= SQUARE_FLAG_OPEN;
+	*target &= ~SQUARE_FLAG_FLAGGED;
 	if (*target & SQUARE_FLAG_MINE)
 	{
 		game->flags &= ~GAME_FLAG_ALIVE;
@@ -212,8 +213,54 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 
 ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 {
-	game->squares[game->width * y + x] ^= SQUARE_FLAG_FLAGGED;
-	return FLAG_TOGGLED;
+	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
+	{
+		game->squares[game->width * y + x] ^= SQUARE_FLAG_FLAGGED;
+		return FLAG_TOGGLED;
+	}
+	return CANT_FLAG;
+}
+
+ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
+{
+	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
+	{
+		// Square needs to be open to attempt opening adjacent.
+		return NOT_OPEN;
+	}
+
+	Neighbors neighbors = getNeighbors(game, x, y);
+	int flag_count = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		if (neighbors.squares[i].square && *neighbors.squares[i].square & SQUARE_FLAG_FLAGGED)
+		{
+			flag_count++;
+		}
+	}
+
+	if (flag_count != countAdjacentMines(game, x, y))
+	{
+		return BAD_FLAG_COUNT;
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (neighbors.squares[i].square)
+		{
+			ActionResult result = openSquare(game, neighbors.squares[i].x, neighbors.squares[i].y);
+			if ( result == MINE)
+			{
+				return MINE;
+			}
+			else if (result == VICTORY)
+			{
+				return VICTORY;
+			}
+		}
+	}
+
+	return CLEAR;
 }
 
 void deleteMinesweeper(Minesweeper* game)

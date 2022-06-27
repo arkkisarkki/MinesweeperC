@@ -17,12 +17,19 @@ typedef enum InitResult_ {
 } InitResult;
 
 typedef enum ActionResult_ {
+	// Open
 	CLEAR,
 	MINE,
 	ALREADY_OPEN,
 	DEAD,
 	CANT_OPEN_FLAGGED,
 	VICTORY,
+	
+	// Open adjacent
+	NOT_OPEN,
+	BAD_FLAG_COUNT,
+
+	// Flag
 	FLAG_TOGGLED,
 	CANT_FLAG
 } ActionResult;
@@ -69,6 +76,8 @@ void printMinesweeper(Minesweeper* game);
 ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y);
 
 ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y);
+
+ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y);
 
 void deleteMinesweeper(Minesweeper* game);
 #endif
