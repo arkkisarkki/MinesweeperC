@@ -5,7 +5,7 @@
 
 /**
  * Create a new minesweeper game.
- * 
+ *
  * \param game Minesweeper struct to initialize.
  * \param width Width of the game.
  * \param height Height of the game.
@@ -17,10 +17,10 @@ InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, u
 	game->width = width;
 	game->height = height;
 	game->flags = GAME_FLAG_ALIVE;
-	
+
 	size_t size = (size_t) width * height;
 	game->squares = calloc(size, sizeof(uint8_t));
-	
+
 	if (!game->squares)
 	{
 		return ERROR_MEM;
@@ -47,61 +47,62 @@ InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, u
 
 /**
  * Get neighboring blocks for given coordinates.
- * 
+ *
  * \param game
  * \param x
  * \param y
- * \return 
+ * \return
  */
 static Neighbors getNeighbors(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	Neighbors retval = { 0 };
+	uint16_t width = game->width;
 
 	if (y > 0)
 	{
-		if (x > 0) 
+		if (x > 0)
 		{
-			retval.top_left.square = &game->squares[(y - 1) * game->width + (x - 1)];
+			retval.top_left.square = &game->squares[coordsToIndex(width, x - 1, y - 1)];
 			retval.top_left.x = x - 1;
 			retval.top_left.y = y - 1;
 		}
-		if (x < game->width-1)
+		if (x < game->width - 1)
 		{
-			retval.top_right.square = &game->squares[(y - 1) * game->width + (x + 1)];
+			retval.top_right.square = &game->squares[coordsToIndex(width, x + 1, y - 1)];
 			retval.top_right.x = x + 1;
 			retval.top_right.y = y - 1;
 		}
-			retval.top_middle.square = &game->squares[(y - 1) * game->width + x];
-			retval.top_middle.x = x;
-			retval.top_middle.y = y - 1;
+		retval.top_middle.square = &game->squares[coordsToIndex(width, x, y - 1)];
+		retval.top_middle.x = x;
+		retval.top_middle.y = y - 1;
 	}
-	if (x > 0) 
-	{
-		retval.left.square = &game->squares[y * game->width + (x - 1)];
+	if (x > 0)
+	{	
+		retval.left.square = &game->squares[coordsToIndex(width, x - 1, y)];
 		retval.left.x = x - 1;
 		retval.left.y = y;
 	}
-	if (x < game->width-1) 
+	if (x < game->width - 1)
 	{
-		retval.right.square = &game->squares[y * game->width + (x + 1)];
+		retval.right.square = &game->squares[coordsToIndex(width, x + 1, y)];
 		retval.right.x = x + 1;
 		retval.right.y = y;
 	}
-	if (y < game->height-1)
+	if (y < game->height - 1)
 	{
-		if (x > 0) 
-		{
-			retval.bottom_left.square = &game->squares[(y + 1) * game->width + (x - 1)];
+		if (x > 0)
+		{	
+			retval.bottom_left.square = &game->squares[coordsToIndex(width, x - 1, y + 1)];
 			retval.bottom_left.x = x - 1;
 			retval.bottom_left.y = y + 1;
 		}
-		if (x < game->width-1) 
+		if (x < game->width - 1)
 		{
-			retval.bottom_right.square = &game->squares[(y + 1) * game->width + (x + 1)];
+			retval.bottom_right.square = &game->squares[coordsToIndex(width, x + 1, y + 1)];
 			retval.bottom_right.x = x + 1;
 			retval.bottom_right.y = y + 1;
 		}
-		retval.bottom_middle.square =		&game->squares[(y + 1) * game->width + x];
+		retval.bottom_middle.square = &game->squares[coordsToIndex(width, x, y + 1)];
 		retval.bottom_middle.x = x;
 		retval.bottom_middle.y = y + 1;
 	}
@@ -111,7 +112,7 @@ static Neighbors getNeighbors(Minesweeper* game, uint16_t x, uint16_t y)
 
 /**
  * Count mines in neighboring squares for given coordinates.
- * 
+ *
  * \param game
  * \param x
  * \param y
@@ -134,7 +135,7 @@ static unsigned int countAdjacentMines(Minesweeper* game, uint16_t x, uint16_t y
 
 /**
  * Print game state to stdout.
- * 
+ *
  * \param game
  */
 void printMinesweeper(Minesweeper* game)
@@ -143,8 +144,8 @@ void printMinesweeper(Minesweeper* game)
 	{
 		for (unsigned int column = 0; column < game->width; column++)
 		{
-			uint8_t current = game->squares[row * game->width + column];
-			
+			uint8_t current = game->squares[coordsToIndex(game->width, column, row)];
+
 			if (current & SQUARE_FLAG_OPEN)
 			{
 				if (current & SQUARE_FLAG_MINE)
@@ -154,7 +155,7 @@ void printMinesweeper(Minesweeper* game)
 				else
 				{
 					unsigned int count = countAdjacentMines(game, column, row);
-					if (count == 0) 
+					if (count == 0)
 					{
 						printf(". ");
 					}
@@ -182,9 +183,9 @@ void printMinesweeper(Minesweeper* game)
 
 /**
  * Check if game is solved.
- * 
+ *
  * \param game
- * \return 
+ * \return
  */
 static int checkVictory(Minesweeper* game)
 {
@@ -196,17 +197,17 @@ static int checkVictory(Minesweeper* game)
 			open_count++;
 		}
 	}
-	
+
 	return game->width * game->height - open_count == game->mines;
 }
 
 /**
  * Attempt to open a square with given coordinates.
- * 
+ *
  * \param game
  * \param x
  * \param y
- * \return 
+ * \return
  */
 ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 {
@@ -216,7 +217,7 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 		return DEAD;
 	}
 
-	uint8_t* target = &game->squares[y * game->width + x];
+	uint8_t* target = &game->squares[coordsToIndex(game->width, x, y)];
 	if (*target & SQUARE_FLAG_OPEN)
 	{
 		return ALREADY_OPEN;
@@ -245,7 +246,7 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 			}
 		}
 	}
-	
+
 	if (checkVictory(game))
 	{
 		game->flags |= GAME_FLAG_VICTORY;
@@ -257,17 +258,17 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 
 /**
  * Attempt to flag a square with given coordinates.
- * 
+ *
  * \param game
  * \param x
  * \param y
- * \return 
+ * \return
  */
 ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 {
-	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
+	if (!(game->squares[coordsToIndex(game->width, x, y)] & SQUARE_FLAG_OPEN))
 	{
-		game->squares[game->width * y + x] ^= SQUARE_FLAG_FLAGGED;
+		game->squares[coordsToIndex(game->width, x, y)] ^= SQUARE_FLAG_FLAGGED;
 		return FLAG_TOGGLED;
 	}
 	return CANT_FLAG;
@@ -275,15 +276,15 @@ ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 
 /**
  * Attempt to open adjacent non-flagged squares for given coordinates.
- * 
+ *
  * \param game
  * \param x
  * \param y
- * \return 
+ * \return
  */
 ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
 {
-	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
+	if (!(game->squares[coordsToIndex(game->width, x, y)] & SQUARE_FLAG_OPEN))
 	{
 		// Square needs to be open to attempt opening adjacent.
 		return NOT_OPEN;
@@ -309,7 +310,7 @@ ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
 		if (neighbors.squares[i].square)
 		{
 			ActionResult result = openSquare(game, neighbors.squares[i].x, neighbors.squares[i].y);
-			if ( result == MINE)
+			if (result == MINE)
 			{
 				return MINE;
 			}
@@ -325,7 +326,7 @@ ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
 
 /**
  * Release allocated memory.
- * 
+ *
  * \param game
  */
 void deleteMinesweeper(Minesweeper* game)
