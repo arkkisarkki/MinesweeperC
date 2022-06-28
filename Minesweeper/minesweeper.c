@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include <time.h>
 
+/**
+ * Create a new minesweeper game.
+ * 
+ * \param game Minesweeper struct to initialize.
+ * \param width Width of the game.
+ * \param height Height of the game.
+ * \param mine_count Number of mines to place.
+ * \return InitResult describing error or successful init.
+ */
 InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, uint16_t mine_count)
 {
 	game->width = width;
@@ -36,6 +45,14 @@ InitResult initMinesweeper(Minesweeper* game, uint16_t width, uint16_t height, u
 	return OK;
 }
 
+/**
+ * Get neighboring blocks for given coordinates.
+ * 
+ * \param game
+ * \param x
+ * \param y
+ * \return 
+ */
 static Neighbors getNeighbors(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	Neighbors retval = { 0 };
@@ -92,6 +109,14 @@ static Neighbors getNeighbors(Minesweeper* game, uint16_t x, uint16_t y)
 	return retval;
 }
 
+/**
+ * Count mines in neighboring squares for given coordinates.
+ * 
+ * \param game
+ * \param x
+ * \param y
+ * \return Count of mines in neighbors.
+ */
 static unsigned int countAdjacentMines(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	Neighbors neighbors = getNeighbors(game, x, y);
@@ -107,6 +132,11 @@ static unsigned int countAdjacentMines(Minesweeper* game, uint16_t x, uint16_t y
 	return retval;
 }
 
+/**
+ * Print game state to stdout.
+ * 
+ * \param game
+ */
 void printMinesweeper(Minesweeper* game)
 {
 	for (unsigned int row = 0; row < game->height; row++)
@@ -150,6 +180,12 @@ void printMinesweeper(Minesweeper* game)
 	}
 }
 
+/**
+ * Check if game is solved.
+ * 
+ * \param game
+ * \return 
+ */
 static int checkVictory(Minesweeper* game)
 {
 	unsigned int open_count = 0;
@@ -164,6 +200,14 @@ static int checkVictory(Minesweeper* game)
 	return game->width * game->height - open_count == game->mines;
 }
 
+/**
+ * Attempt to open a square with given coordinates.
+ * 
+ * \param game
+ * \param x
+ * \param y
+ * \return 
+ */
 ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	if (!(game->flags & GAME_FLAG_ALIVE))
@@ -211,6 +255,14 @@ ActionResult openSquare(Minesweeper* game, uint16_t x, uint16_t y)
 	return CLEAR;
 }
 
+/**
+ * Attempt to flag a square with given coordinates.
+ * 
+ * \param game
+ * \param x
+ * \param y
+ * \return 
+ */
 ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
@@ -221,6 +273,14 @@ ActionResult toggleFlag(Minesweeper* game, uint16_t x, uint16_t y)
 	return CANT_FLAG;
 }
 
+/**
+ * Attempt to open adjacent non-flagged squares for given coordinates.
+ * 
+ * \param game
+ * \param x
+ * \param y
+ * \return 
+ */
 ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
 {
 	if (!(game->squares[game->width * y + x] & SQUARE_FLAG_OPEN))
@@ -263,6 +323,11 @@ ActionResult openAllAdjacent(Minesweeper* game, uint16_t x, uint16_t y)
 	return CLEAR;
 }
 
+/**
+ * Release allocated memory.
+ * 
+ * \param game
+ */
 void deleteMinesweeper(Minesweeper* game)
 {
 	free(game->squares);
